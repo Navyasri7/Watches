@@ -1,0 +1,52 @@
+ <beans xmlns="http://www.springframework.org/schema/beans"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:aop="http://www.springframework.org/schema/aop"
+xmlns:context="http://www.springframework.org/schema/context"
+xmlns:p="http://www.springframework.org/schema/p"
+xmlns:tx="http://www.springframework.org/schema/tx"
+xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context.xsd 
+http://www.springframework.org/schema/tx 
+http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- Activates scanning of @Autowired -->
+    <context:annotation-config/>
+
+<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+ <property name="dataSource" ref="dataSource" />
+ <property name="hibernateProperties">  
+            <props>  
+                <prop key="hibernate.dialect">org.hibernate.dialect.H2Dialect</prop>
+                <prop key="hibernate.current_session_context_class">thread</prop>  
+                <!-- <prop key="hibernate.hbm2ddl.auto">create</prop>  only for first time, otherwise table created again and again-->  
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.show_sql">true</prop>                   
+            </props>  
+    </property>
+  
+    
+   <property name="packagesToScan">
+    <list>        		
+         <value>com.bags.model</value>        			
+    </list>
+</property>
+    
+    <!--  <property name="hibernate.implicit_naming_strategy" value="org.music.persistence.PGConstrainedImplicitNamingStrategy"/> -->
+</bean>
+<context:component-scan base-package="com.bags.*"/>
+
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">  
+        <property name="driverClassName" value="org.h2.Driver"></property>  
+        <property name="url" value="jdbc:h2:tcp://localhost/~/MyBags;INIT=CREATE SCHEMA IF NOT EXISTS MyBags"></property>  
+        <property name="username" value="sa"></property>
+        <property name="password" value=""></property>  
+</bean>  
+<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">  
+        <!-- one of the properties available; the maximum file size in bytes -->  
+        <property name="maxUploadSize" value="5242880">  
+    </property> 
+    </bean>
+
+</beans>

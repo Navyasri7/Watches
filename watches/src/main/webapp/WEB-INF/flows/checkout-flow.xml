@@ -1,0 +1,50 @@
+<flow xmlns="http://www.springframework.org/schema/webflow"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/webflow 
+      http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
+      
+<var name="order" class="com.watches.model.Customer" />
+      
+     <action-state id="addCartToOrder">
+    	 <evaluate expression="cartDaoImp.getCart(requestParameters.cartId)" result="order.cart" />
+    	  <transition to="collectCustomerInfo" />
+     </action-state> 
+     
+ 	<view-state id="collectCustomerInfo" view="collectCustomerInfo.jsp" model="order">
+        <transition on="customerInfoCollected" to="collectShippingDetail" />
+    </view-state>     
+
+    <view-state id="collectShippingDetail" view="collectShippingDetail.jsp" model="order">
+     	<transition on="shippingDetailCollected" to="orderConfirmation" />
+        <transition on="backToCollectCustomerInfo" to="collectCustomerInfo" />
+    </view-state>
+           
+	<view-state id="orderConfirmation" view="orderConfirmation.jsp" model="order">
+		<transition on="backToCollectShippingDetail" to="collectShippingDetail"></transition>
+		<transition on="orderConfirmed" to="processOrder"></transition>
+	</view-state>
+           
+ 	<action-state id="processOrder">
+		<evaluate expression="customerOrderDaoImp.addCustomerOrder(order.cart)"></evaluate>
+		<transition to="clearCart"></transition>
+	</action-state>         
+           
+	<action-state id="clearCart">
+		<evaluate expression="cartItemDaoImp.removeAllCartItems1(order.cart)"></evaluate>
+		<transition to="thankCustomer"></transition>
+	</action-state>      
+	
+	<view-state id="thankCustomer" view="thankCustomer.jsp" model="order">
+		<transition to="endState"></transition>
+	</view-state>
+	
+	<end-state id="endState"></end-state>    
+	
+	<end-state id="cancelCheckOut" view="checkoutCancelled.jsp">
+	</end-state>
+
+	<global-transitions>
+		<transition on="cancel" to="cancelCheckOut"></transition>
+	</global-transitions> 
+	
+</flow>

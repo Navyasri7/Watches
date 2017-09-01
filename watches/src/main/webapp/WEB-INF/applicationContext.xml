@@ -1,0 +1,112 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:aop="http://www.springframework.org/schema/aop"
+xmlns:context="http://www.springframework.org/schema/context"
+xmlns:p="http://www.springframework.org/schema/p"
+xmlns:tx="http://www.springframework.org/schema/tx"
+
+xmlns:webflow-config="http://www.springframework.org/schema/webflow-config"
+xmlns:security="http://www.springframework.org/schema/security"
+xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context.xsd 
+http://www.springframework.org/schema/tx 
+http://www.springframework.org/schema/tx/spring-tx.xsd
+http://www.springframework.org/schema/webflow-config 
+http://www.springframework.org/schema/webflow-config/spring-webflow-config.xsd
+http://www.springframework.org/schema/security
+http://www.springframework.org/schema/security/spring-security.xsd
+">
+
+    <!-- Activates scanning of @Autowired -->
+    <context:annotation-config/>
+<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+ <property name="dataSource" ref="dataSource" />
+ <property name="hibernateProperties">  
+            <props>  
+                <prop key="hibernate.dialect">org.hibernate.dialect.H2Dialect</prop>
+                <prop key="hibernate.current_session_context_class">thread</prop>  
+                <!-- <prop key="hibernate.hbm2ddl.auto">create</prop>  only for first time, otherwise table created again and again-->  
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.show_sql">true</prop>                   
+            </props>  
+    </property>
+  
+    
+   <property name="packagesToScan">
+    <list>        		
+         <value>com.watches.model</value>        			
+    </list>
+</property>
+    
+    <!--  <property name="hibernate.implicit_naming_strategy" value="org.music.persistence.PGConstrainedImplicitNamingStrategy"/> -->
+</bean>
+<context:component-scan base-package="com.watches.*"/>
+
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">  
+        <property name="driverClassName" value="org.h2.Driver"></property>  
+        <property name="url" value="jdbc:h2:tcp://localhost/~/MyBags;INIT=CREATE SCHEMA IF NOT EXISTS MyBags"></property>  
+        <property name="username" value="sa"></property>
+        <property name="password" value=""></property>  
+</bean>  
+<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">  
+        <!-- one of the properties available; the maximum file size in bytes -->  
+        <property name="maxUploadSize" value="5242880">  
+    </property> 
+    </bean>
+
+	<!--  Web flow -->
+	
+	<webflow-config:flow-executor id="flowExecutor" flow-registry="flowRegistry" />
+
+	<webflow-config:flow-registry id="flowRegistry" base-path="/WEB-INF/flows">
+		<webflow-config:flow-location path="/checkout-flow.xml" id="checkout" />
+	</webflow-config:flow-registry>
+
+	<bean id="flowHandlerMapping"
+		class="org.springframework.webflow.mvc.servlet.FlowHandlerMapping">
+		<property name="flowRegistry" ref="flowRegistry" />
+	</bean>
+
+	<bean id="flowHandlerAdapter"
+		class="org.springframework.webflow.mvc.servlet.FlowHandlerAdapter">
+		<property name="flowExecutor" ref="flowExecutor" />
+	</bean>
+<security:http>
+	<security:csrf disabled="true" />
+
+	<!-- with out authentication -->
+	<security:intercept-url pattern="/reqLoginPage1" access="permitAll" />
+	<security:intercept-url pattern="/reqSignupPage" access="permitAll" />
+
+	<!-- to allow users -->
+	<security:intercept-url pattern="/reqDisplayProductsUser" access="hasRole('ROLE_USER')" />
+	<security:intercept-url pattern="/reqAllSuppProducts*" access="hasRole('ROLE_USER')" />
+	<security:intercept-url pattern="/reqAddItemToCart**" access="hasRole('ROLE_USER')" />
+	<security:intercept-url pattern="/reqDisplayCart" access="hasRole('ROLE_USER')" />
+
+	<!-- to allow admins -->
+	<security:intercept-url pattern="/reqDisplayProdcutsAdmin" access="hasRole('ROLE_ADMIN')" />
+
+	<!-- login config -->
+
+	<security:form-login login-page="/reqLoginPage1"
+	authentication-failure-url="/reqLoginPage1?error"
+	login-processing-url="/j_spring_security_check" default-target-url="/springLoginCheck"
+	username-parameter="j_username" password-parameter="j_password" />
+
+	<security:logout logout-success-url="/reqLogoutSpring" 
+	logout-url="/j_spring_security_logout" />
+
+</security:http>
+
+<security:authentication-manager>
+<security:authentication-provider>
+	<security:jdbc-user-service data-source-ref="dataSource"
+	users-by-username-query="select userid,password, enabled from userdetails where userid=?"
+	authorities-by-username-query="select userid, userrole from userdetails where userid=?" />
+</security:authentication-provider>
+</security:authentication-manager>
+	
+</beans>
