@@ -26,7 +26,7 @@ import com.watches.service.CustomerServiceInt;
 public class CustomerController {
 	@Autowired
 	private CustomerServiceInt customerService;
-	@RequestMapping("/reqLogout")
+	@RequestMapping("/reqLogout") //without spring secuurity
 	public String logout(HttpSession hsession,Model m)
 	{
 		hsession.invalidate();
