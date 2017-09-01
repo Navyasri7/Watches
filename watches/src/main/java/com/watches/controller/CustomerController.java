@@ -53,34 +53,8 @@ public class CustomerController {
 		return "signuppage1";
 	}
 	
+	
 
-	/*@RequestMapping("/reqSendSignupData")
-	public String sendSignUpData(@ModelAttribute("customer") Customer cust, Model m) {
-
-		cust.setEnabled(true);
-		cust.getUserDetails().setUserrole("ROLE_USER");
-		cust.getUserDetails().setEnabled(true);
-
-		BillingAddress bad = new BillingAddress();
-		bad.setHouseno(cust.getShippingAddress().getHouseno());
-		bad.setStreet(cust.getShippingAddress().getStreet());
-		bad.setArea(cust.getShippingAddress().getArea());
-		bad.setCity(cust.getShippingAddress().getCity());
-		bad.setState(cust.getShippingAddress().getState());
-		bad.setCountry(cust.getShippingAddress().getCountry());
-		bad.setPincode(cust.getShippingAddress().getPincode());
-
-		Cart crt = new Cart();
-
-		cust.setBillingAddress(bad);
-		cust.setCart(crt);
-
-		String userid = customerService.addCustomer(cust);
-		String message = "Signup is successfull.\nNew User id : " + userid;
-		m.addAttribute("signupmsg", message);
-		m.addAttribute("userObject", new UserDetails());
-		return "loginpage1";
-	}*/
 	@RequestMapping("/reqSendSignupData1") // with validation
 	public String sendSignUpData1(@Valid @ModelAttribute("customer") Customer customer, BindingResult result, Model m) {
 		if (result.hasErrors()) {
